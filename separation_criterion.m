@@ -16,7 +16,7 @@ end
 % identifies peaks
 [pks,locs] = findpeaks(I, q, 'MinPeakDistance', known_separation_between_x_axis,...
     'MinPeakHeight', 0.3);
-[~, inx] = sort(pks, 'descend');
+[~, inx] = sort(locs);
 
 % in case a single peak is found
 if length(pks)<2

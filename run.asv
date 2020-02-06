@@ -48,17 +48,17 @@ end
 if options.flag.SR_alone  
     
     HR_alone = cell(1, options.LRfactor);
-    I_SR_alone = HR_alone;
-    q_SR_alone = HR_alone;
-    deltaSRalone = zeros(1, options.LRfactor);
+    I_CMD_alone_Rec = HR_alone;
+    q_CMD_alone_Rec = HR_alone;
+    deltaCMDalone = zeros(1, options.LRfactor);
     
     for i = 1:options.PSF.number
         HR_alone{i} = my_SR(squeeze(LRImages(:, :, :, i)), ...
             options.LRfactor, PSF{i});
-        [I_SR_alone{i}, q_SR_alone{i}, ~] = ...
-            CircularIntegration(HR_alone{i});                     % circular int. of reconstruction
-        deltaSRalone(i) = separation_criterion(q_SR_alone{i}, ...
-            I_SR_alone{i}, options.separation_init);           % delta of reconstruction
+        [I_CMD_alone_Rec{i}, q_CMD_alone_Rec{i}, ~] = ...
+            CircularIntegration(CMD_alone_Rec);                     % circular int. of reconstruction
+        deltaCMDalone(i) = separation_criterion(q_CMD_alone_Rec{i}, ...
+            I_CMD_alone_Rec{i}, options.separation_init);           % delta of reconstruction
     end
     
 end
@@ -103,11 +103,11 @@ if options.flag.srSAXS
     sigmas = normpdf(flux, mean(flux)*S, mean(flux)/3);
     sigmas = sigmas./max(sigmas);                             % normalization of sigma
 
-    srSAXS_Rec = CMD(HR_for_CMD, PSF, I0, eps, 200, 0, lambda,1./sigmas); % main algorithm
+    srSAXS = CMD(HR_for_CMD, PSF, I0, eps, 200, 0, lambda,1./sigmas); % main algorithm
 
-    srSAXS_Rec = gather(srSAXS_Rec); srSAXS_Rec(srSAXS_Rec<0)=0;                          % reconstruction final adjustment
-    [I_srSAXS, q_srSAXS, ~] = CircularIntegration(srSAXS_Rec);                % circular int. of reconstruction
-    deltasrSAXS = separation_criterion(q_srSAXS, I_srSAXS, options.separation_init); % delta of reconstruction
+    srSAXS = gather(srSAXS); srSAXS(srSAXS<0)=0;                          % reconstruction final adjustment
+    [I_srSAXS, q_srSAXS, ~] = CircularIntegration(srSAXS);                % circular int. of reconstruction
+    deltaCMDalone = separation_criterion(q_srSAXS, I_srSAXS, options.separation_init); % delta of reconstruction
 end
 %% plot 
 figure('WindowStyle', 'docked', 'NumberTitle', 'off', 'Name', 'results')
@@ -115,9 +115,6 @@ hold on; grid on; grid minor
 plot(qGT, IGT./max(IGT), 'DisplayName', sprintf('GT  %.2f', deltaGT))
 plot(q_CMD_alone_Rec, I_CMD_alone_Rec./max(I_CMD_alone_Rec), ...
     'DisplayName', sprintf('CMD reco  %.2f', deltaCMDalone))
-plot(q_srSAXS, I_srSAXS./max(I_srSAXS), ...
-    'DisplayName', sprintf('srSAXS reco  %.2f', deltasrSAXS))
-plot(q_SR_alone{1}, I_SR_alone{1}./max(I_SR_alone{1}), ...
-    'DisplayName', sprintf('SR reco  %.2f', deltaSRalone{1}))
+plot(q_CMD_alone_Rec, I_CMD_alone_Rec./max(I_CMD_alone_Rec), 'DisplayName', sprintf('CMD reco  %.2f', deltaCMDalone))
 l = legend;
 l.Title.String = 'numbers for delta critiria';
