@@ -19,8 +19,7 @@ GT = simulate_GT(options);                                % simulates ground tru
 GT = GT + BKG_noise(options);                             % adds background noise
 GT = GT./max(GT, [], 'all');                              % normalizing
 [IGT, qGT, ~] = CircularIntegration(GT);                  % circular int of GT
-% plot(q, vec)
-scoreGT = separation_criterion(qGT, IGT, options.separation_init); % delta of GT
+deltaGT = separation_criterion(qGT, IGT, options.separation_init); % delta of GT
 
 %% PSF + blur
 PSF = MultiplePSFGenerator(options);                      % generation of PSFs
@@ -33,12 +32,22 @@ flux = zeros(options.PSF.number);                         % flux at each corrupt
 for ik = 1:options.PSF.number
     flux(ik) = sum(corrupted{ik}, 'all');
 end
-S = 0.2;                                                  % sigmas mean parameter
+S = 0.12;                                                  % sigmas mean parameter
 lambda = 0.05;   
 sigmas = normpdf(flux, mean(flux)*S, mean(flux)/3);
 sigmas = sigmas./max(sigmas);                             % normalization of sigma
+
 Rec = CMD(corrupted, PSF, I0, eps, 200, 0, lambda,1./sigmas); % main algorithm
+
 Rec = gather(Rec); Rec(Rec<0)=0;                          % reconstruction final adhustment
 [I, q, ~] = CircularIntegration(Rec);                     % circular int. of reconstruction
-score = separation_criterion(q, I, options.separation_init); % delta of reconstruction
+delta = separation_criterion(q, I, options.separation_init); % delta of reconstruction
 
+
+%% plot 
+figure('WindowStyle', 'docked', 'NumberTitle', 'off', 'Name', 'results')
+hold on; grid on; grid minor
+plot(qGT, IGT./max(IGT), 'DisplayName', sprintf('GT  %.2f', deltaGT))
+plot(q, I./max(I), 'DisplayName', sprintf('CMD reco  %.2f', delta))
+l = legend;
+l.Title.String = 'numbers for delta critiria';
