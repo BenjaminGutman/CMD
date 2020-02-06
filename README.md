@@ -1,4 +1,4 @@
 # CMD
 After the algorithm proposed in ...
 
-for tamplate on syntetic data, use 'run.m' file
+for tamplate on synthetic data, use 'run.m' file
