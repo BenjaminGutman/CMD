@@ -1,6 +1,6 @@
 
 addpath 'SR';
-addpath 'SR\registration';
+addpath(fullfile('SR', 'registration'));
 %% options
 options = struct;
 options.gridSz          = 160;                            % size of image in pixels 
